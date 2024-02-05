@@ -24,7 +24,7 @@ int _mergeSort(vector<int> arr, int temp[], int left, int right)
 	int mid, inv_count = 0;
 	if (right > left) {
 		// Divide the array into two parts and
-		// call _mergeSortAndCountInv()
+		// call _mergeSort()
 		// for each of the parts
 		mid = (right + left) / 2;
 
@@ -58,8 +58,6 @@ int merge(vector<int> arr, int temp[], int left, int mid,
 		else {
 			temp[k++] = arr[j++];
 
-			// this is tricky -- see above
-			// explanation/diagram for merge()
 			inv_count = inv_count + (mid - i);
 		}
 	}
