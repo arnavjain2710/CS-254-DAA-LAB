@@ -6,36 +6,25 @@ struct Job {
 };
 
 bool comparison(Job a, Job b) {
-    return (a.profit > b.profit);
+    return (a.deadline < b.deadline);
 }
 
-void findMaxProfit(vector<Job>& jobs, int n) {
+int findMaxProfit(vector<Job>& jobs, int n) {
     sort(jobs.begin(), jobs.end(), comparison);
-    int result[n];
-    bool slot[n];
-    for (int i = 0; i < n; i++)
-        slot[i] = false;
+    int maxDeadline = jobs[n-1].deadline;
+    vector<int> dp(maxDeadline+1, 0);
     for (int i = 0; i < n; i++) {
-        for (int j = min(n, jobs[i].deadline) - 1; j >= 0; j--) {
-            if (slot[j] == false) {
-                result[j] = i;
-                slot[j] = true;
-                break;
+        for (int j = jobs[i].deadline; j > 0; j--) {
+            if (dp[j] < dp[j-1] + jobs[i].profit) {
+                dp[j] = dp[j-1] + jobs[i].profit;
             }
         }
     }
-    int max_profit=0;
-    for (int i = 0; i < n; i++)
-        if (slot[i])
-        {
-            max_profit+=jobs[result[i]].profit ;
-            cout << jobs[result[i]].id << ' ';
-        }
-    cout<<endl;
-    cout<<"The maximum profit is: "<<max_profit<<endl;
+    return *max_element(dp.begin(), dp.end());
 }
 
-int main() {
+int main()
+{
     int M =0;
     ifstream input("deadline.txt");
     vector<int> deadline;
@@ -71,9 +60,10 @@ int main() {
         a.profit = profit[i];
         jobs.push_back(a);
     }
-    findMaxProfit(jobs, n);
+
+    std::cout << "Maximum profit is " << findMaxProfit(jobs, n) << std::endl;
     return 0;
 }
 
 
-// T.C. - O(n.log(n))
+// T.C. - O(n^2)
