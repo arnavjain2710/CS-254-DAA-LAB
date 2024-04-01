@@ -1,31 +1,31 @@
-#include <bits/stdc++.h>
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<tuple>
+#include<algorithm>
+#include<bits/stdc++.h>
+
 using namespace std;
-struct Job {
-    char id;
-    int deadline, profit;
-};
+using ti = tuple<char, int, int>;
 
-bool comparison(Job a, Job b) {
-    return (a.deadline < b.deadline);
-}
-
-int findMaxProfit(vector<Job>& jobs, int n) {
-    sort(jobs.begin(), jobs.end(), comparison);
-    int maxDeadline = jobs[n-1].deadline;
-    vector<int> dp(maxDeadline+1, 0);
-    for (int i = 0; i < n; i++) {
-        for (int j = jobs[i].deadline; j > 0; j--) {
-            if (dp[j] < dp[j-1] + jobs[i].profit) {
-                dp[j] = dp[j-1] + jobs[i].profit;
-            }
-        }
+bool comp(ti t1, ti t2){
+    if(get<1>(t1)>get<1>(t2))return false;
+    else if(get<1>(t1)==get<1>(t2)){
+        if(get<2>(t1)>get<2>(t2))return false;
+        else return true;
     }
-    return *max_element(dp.begin(), dp.end());
+    else return true;
 }
 
-int main()
-{
-    int M =0;
+int helper(vector<ti>& v, int ind, int time, int n, int max_t, vector<vector<int>>& dp){
+    if(time>max_t || ind>=n)return 0;
+    if(dp[ind][time]!=-1)return dp[ind][time];
+    int ans = helper(v, ind+1, time, n, max_t, dp);
+    if(time<=get<1>(v[ind])) ans = max(ans, helper(v, ind+1, time+1, n, max_t, dp)+get<2>(v[ind]));
+    return dp[ind][time] = ans;
+}
+
+int main(){
     ifstream input("deadline.txt");
     vector<int> deadline;
     int x;
@@ -50,20 +50,22 @@ int main()
     while (input2 >> y)
         job.push_back(y);
     input2.close();
-
-    vector<Job> jobs ;
+    vector<ti> v(n);
+    int max_t=0;
     for(int i=0;i<n;i++)
     {
-        Job a;
-        a.id = job[i];
-        a.deadline = deadline[i];
-        a.profit = profit[i];
-        jobs.push_back(a);
+        int a= job[i];
+        int b = deadline[i];
+        int c = profit[i];
+        v[i] = {a, b, c};
+        max_t=max(max_t, b);
     }
-
-    std::cout << "Maximum profit is " << findMaxProfit(jobs, n) << std::endl;
+    
+    // cout<<max_t<<endl;
+    sort(v.begin(), v.end(), comp);
+    vector<vector<int>> dp(n, vector<int>(max_t+1, -1));
+    cout<<helper(v, 0, 1, n, max_t, dp)<<endl;
     return 0;
 }
 
-
-// T.C. - O(n^2)
+//time complexity: O(n*max_t)

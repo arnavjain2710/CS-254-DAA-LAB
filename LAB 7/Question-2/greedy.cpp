@@ -1,42 +1,22 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<tuple>
 #include <bits/stdc++.h>
+
 using namespace std;
-struct Job {
-    char id;
-    int deadline, profit;
-};
+using ti = tuple<char, int, int>;
 
-bool comparison(Job a, Job b) {
-    return (a.profit > b.profit);
-}
-
-void findMaxProfit(vector<Job>& jobs, int n) {
-    sort(jobs.begin(), jobs.end(), comparison);
-    int result[n];
-    bool slot[n];
-    for (int i = 0; i < n; i++)
-        slot[i] = false;
-    for (int i = 0; i < n; i++) {
-        for (int j = min(n, jobs[i].deadline) - 1; j >= 0; j--) {
-            if (slot[j] == false) {
-                result[j] = i;
-                slot[j] = true;
-                break;
-            }
-        }
+bool comp(ti t1, ti t2){
+    if(get<1>(t1)<get<1>(t2))return false;
+    else if(get<1>(t1)==get<1>(t2)){
+        if(get<2>(t1)>get<2>(t2))return false;
+        else return true;
     }
-    int max_profit=0;
-    for (int i = 0; i < n; i++)
-        if (slot[i])
-        {
-            max_profit+=jobs[result[i]].profit ;
-            cout << jobs[result[i]].id << ' ';
-        }
-    cout<<endl;
-    cout<<"The maximum profit is: "<<max_profit<<endl;
+    else return true;
 }
 
-int main() {
-    int M =0;
+int main(){
     ifstream input("deadline.txt");
     vector<int> deadline;
     int x;
@@ -61,19 +41,31 @@ int main() {
     while (input2 >> y)
         job.push_back(y);
     input2.close();
-
-    vector<Job> jobs ;
+    priority_queue<ti, vector<ti>, decltype(&comp)> p(comp);
     for(int i=0;i<n;i++)
     {
-        Job a;
-        a.id = job[i];
-        a.deadline = deadline[i];
-        a.profit = profit[i];
-        jobs.push_back(a);
+        int a= job[i];
+        int b = deadline[i];
+        int c = profit[i];
+        p.push({a,b,c});
     }
-    findMaxProfit(jobs, n);
+    int time{1}, max_profit{0};
+    queue<char> seq;
+    while(!p.empty()){
+        ti curr = p.top();
+        p.pop();
+        if(time<=get<1>(curr)){
+            time++;
+            seq.push(get<0>(curr));
+            max_profit += get<2>(curr);
+        }
+    }
+    cout<<endl;
+    while(!seq.empty()){
+        char job = seq.front();
+        cout<<job<<" ";
+        seq.pop();
+    }
+    cout<<max_profit<<endl;
     return 0;
 }
-
-
-// T.C. - O(n.log(n))
